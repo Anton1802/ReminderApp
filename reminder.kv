@@ -1,0 +1,24 @@
+<Reminder>
+
+    task_list: task_list
+
+    ActionBar:
+        pos_hint: {'center_x': 0.5, 'center_y': 0.97}
+        background_color: 1, 1, 1
+        ActionView:
+            ActionSeparator:
+            ActionButton:
+                text: "Add"
+                on_press: root.add_task()
+            ActionPrevious:
+                title: "Reminder"
+    ScrollView:
+        do_scroll_x: False
+        size_hint: 1, 0.910
+        GridLayout:
+            cols: 1
+            size_hint: 1, 0.1
+            spacing: 4
+            size_hint_y: None
+            height: self.minimum_height
+            id: task_list
