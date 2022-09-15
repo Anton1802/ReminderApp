@@ -8,6 +8,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
+import re
 
 
 class Reminder(FloatLayout):
@@ -15,17 +16,27 @@ class Reminder(FloatLayout):
     task = {}
 
     def save_task(self, instance, title, description, time):
-        id = len(self.task) + 1
-        self.task[id] = {
+        if self.time_valid(time.text):
+            id = len(self.task) + 1
+            self.task[id] = {
                         'title': title.text, 'description': description.text,
                         'time': time.text
                         }
-        button = Button(text=f"Task: {self.task[id]['title']}",
+            button = Button(
+                        text=f"Task: {self.task[id]['title']}",
                         size_hint_y=None,
-                        on_press=lambda x: self.show_task(id=id,
-                                                          instance=button),
+                        on_press=lambda x: self.show_task(
+                            id=id,
+                            instance=button
+                            ),
                         )
-        self.task_list.add_widget(button)
+            self.task_list.add_widget(button)
+        else:
+            pop_error = Popup(title="Ошибка!", size_hint=(.8, .7))
+            pop_error.add_widget(Label(
+             text="Введите время в формате часы:минуты"
+            ))
+            pop_error.open()
 
     def add_task(self):
         pop = Popup(size_hint=(.8, .7), title="New Task")
@@ -45,6 +56,7 @@ class Reminder(FloatLayout):
         button_add = Button(text="Add", size=(100, 50),
                             size_hint_y=None)
         task_time = TextInput(size_hint_y=.1)
+        self.task_time = task_time
         label_task_time = Label(text="Time Task: ",
                                 size_hint_y=.1)
         layout_box_1.add_widget(label_task_title)
@@ -63,6 +75,9 @@ class Reminder(FloatLayout):
 
     def show_task(self, instance, id):
         print(self.task[id])
+
+    def time_valid(self, text):
+        return re.search('^[0-9]{2}:[0-9]{2}$', text)
 
 
 class ReminderApp(App):
