@@ -8,8 +8,10 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
 import re
 import pickle
+from textwrap import wrap
 
 
 class Reminder(FloatLayout):
@@ -77,10 +79,17 @@ class Reminder(FloatLayout):
             if self.tasks[task]['title'] == task_title:
                 popup_task = Popup(title=self.tasks[task]['title'],
                                    size_hint=(.7, .8))
-                popup_task.add_widget(Label(text="\n Описание: " +
-                                            self.tasks[task]['description']
-                                            + "\n Время: "
-                                            + self.tasks[task]['time']))
+                scrollview = ScrollView()
+                boxlayout = BoxLayout(orientation="vertical")
+                text = f"Описание: {self.tasks[task]['description']}"
+                label = Label()
+                for str in wrap(text, width=60):
+                    label.text += str + "\n"
+                boxlayout.add_widget(label)
+                label2 = Label(text=f"Время: {self.tasks[task]['time']}")
+                boxlayout.add_widget(label2)
+                scrollview.add_widget(boxlayout)
+                popup_task.add_widget(scrollview)
                 popup_task.open()
 
     def time_valid(self, text):
