@@ -82,11 +82,12 @@ class Reminder(FloatLayout):
                 scrollview = ScrollView()
                 boxlayout = BoxLayout(orientation="vertical")
                 text = f"Описание: {self.tasks[task]['description']}"
-                label = Label()
-                for str in wrap(text, width=60):
+                label = Label(font_size="20sp")
+                for str in wrap(text, width=45):
                     label.text += str + "\n"
                 boxlayout.add_widget(label)
-                label2 = Label(text=f"Время: {self.tasks[task]['time']}")
+                label2 = Label(text=f"Время: {self.tasks[task]['time']}",
+                               font_size="20sp")
                 boxlayout.add_widget(label2)
                 scrollview.add_widget(boxlayout)
                 popup_task.add_widget(scrollview)
@@ -114,7 +115,6 @@ class Reminder(FloatLayout):
                 buttons.append(Button(
                              text=f"Task: {self.tasks[task]['title']}",
                              size_hint_y=None))
-
             for bu in range(len(buttons)):
                 buttons[bu].bind(on_press=self.show_task)
                 self.task_list.add_widget(buttons[bu])
