@@ -1,40 +1,42 @@
 #!/usr/bin/python3
 
-from kivy.app import App
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.textinput import TextInput
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.scrollview import ScrollView
-import re
 import pickle
-from textwrap import wrap
+import re
+
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.textinput import TextInput
+from kivy.uix.checkbox import CheckBox
 
 
 class Reminder(FloatLayout):
 
     tasks = {}
+    buttons = []
 
-    def save_task(self, instance, title, description, time):
+    def save_task(self, title, description, time):
         if self.time_valid(time.text):
             id = len(self.tasks) + 1
             self.tasks[id] = {
-                        'title': title.text, 'description': description.text,
-                        'time': time.text
-                        }
-            button = Button(
-                        text=f"Task: {self.tasks[id]['title']}",
-                        size_hint_y=None, on_press=self.show_task
-                        )
-            self.task_list.add_widget(button)
+                'title': title.text, 'description': description.text,
+                'time': time.text
+            }
+            self.buttons.append(Button(
+                text=f"Task: {self.tasks[id]['title']}",
+                size_hint_y=None, on_press=self.show_task
+            ))
+            self.task_list.add_widget(self.buttons.pop())
             self.write_t()
         else:
             pop_error = Popup(title="Ошибка!", size_hint=(.8, .7))
             pop_error.add_widget(Label(
-             text="Введите время в формате часы:минуты"
+                text="Введите время в формате часы:минуты"
             ))
             pop_error.open()
 
@@ -68,8 +70,8 @@ class Reminder(FloatLayout):
         layout_box_2.add_widget(button_add)
         pop.add_widget(layout_main)
         button_add.bind(on_press=lambda x: self.save_task(title=task_title,
-                        description=task_description,
-                        time=task_time, instance=button_add))
+                                                          description=task_description,
+                                                          time=task_time))
         button_add.bind(on_press=pop.dismiss)
 
     def show_task(self, instance):
@@ -81,10 +83,9 @@ class Reminder(FloatLayout):
                                    size_hint=(.7, .8))
                 scrollview = ScrollView()
                 boxlayout = BoxLayout(orientation="vertical")
-                text = f"Описание: {self.tasks[task]['description']}"
-                label = Label(font_size="20sp")
-                for str in wrap(text, width=45):
-                    label.text += str + "\n"
+                text = self.tasks[task]['description']
+                label = Label(font_size="20sp", text_size=(200, None))
+                label.text += text
                 boxlayout.add_widget(label)
                 label2 = Label(text=f"Время: {self.tasks[task]['time']}",
                                font_size="20sp")
@@ -110,14 +111,40 @@ class Reminder(FloatLayout):
         except FileNotFoundError:
             pass
         if len(self.tasks):
-            buttons = []
+            self.buttons = []
             for task in self.tasks:
-                buttons.append(Button(
-                             text=f"Task: {self.tasks[task]['title']}",
-                             size_hint_y=None))
-            for bu in range(len(buttons)):
-                buttons[bu].bind(on_press=self.show_task)
-                self.task_list.add_widget(buttons[bu])
+                self.buttons.append(Button(
+                    text=f"Task: {self.tasks[task]['title']}",
+                    size_hint_y=None))
+            for bu in range(len(self.buttons)):
+                self.buttons[bu].bind(on_press=self.show_task)
+                self.task_list.add_widget(self.buttons[bu])
+
+    def del_process(self, element):
+        try:
+            element = int(element)
+            self.task_list.remove_widget(self.buttons[element-1])
+            self.tasks.pop(element)
+            self.write_t()
+        except:
+            popup = Popup(title="Error", size_hint=(.5, .5))
+            label = Label(text="Element is not find!")
+            popup.add_widget(label)
+            popup.open()
+
+
+    def del_task(self):
+        print(self.tasks)
+        window_del = Popup(title="Delete Task", size_hint=(.5, .5))
+        layout = BoxLayout(orientation='vertical', padding=50, spacing=20)
+        text_input = TextInput(size_hint=(1, .5))
+        btn = Button(size_hint=(1, .5), text="Delete", on_press=lambda x: self.del_process(text_input.text))
+        label = Label(text="Id: ", halign="left", valign="bottom")
+        layout.add_widget(label)
+        layout.add_widget(text_input)
+        layout.add_widget(btn)
+        window_del.add_widget(layout)
+        window_del.open()
 
     def start(self):
         self.read_t()
