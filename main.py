@@ -31,12 +31,12 @@ class Reminder(FloatLayout):
                 text=f"Task: {self.tasks[id]['title']}",
                 size_hint_y=None, on_press=self.show_task
             ))
-            self.task_list.add_widget(self.buttons.pop())
             self.write_t()
+            self.read_t()
         else:
             pop_error = Popup(title="Ошибка!", size_hint=(.8, .7))
             pop_error.add_widget(Label(
-                text="Введите время в формате часы:минуты"
+                text="Введите время\nв формате часы:минуты",
             ))
             pop_error.open()
 
@@ -121,14 +121,14 @@ class Reminder(FloatLayout):
                 self.task_list.add_widget(self.buttons[bu])
 
     def del_process(self, element):
+        popup = Popup(title="Error", size_hint=(.5, .5))
+        label = Label(text="Element is not find!")
         try:
             element = int(element)
             self.task_list.remove_widget(self.buttons[element-1])
             self.tasks.pop(element)
             self.write_t()
         except:
-            popup = Popup(title="Error", size_hint=(.5, .5))
-            label = Label(text="Element is not find!")
             popup.add_widget(label)
             popup.open()
 
@@ -136,15 +136,16 @@ class Reminder(FloatLayout):
     def del_task(self):
         print(self.tasks)
         window_del = Popup(title="Delete Task", size_hint=(.5, .5))
-        layout = BoxLayout(orientation='vertical', padding=50, spacing=20)
-        text_input = TextInput(size_hint=(1, .5))
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=20)
+        text_input = TextInput(size_hint=(1, .4), multiline=False, halign='center')
         btn = Button(size_hint=(1, .5), text="Delete", on_press=lambda x: self.del_process(text_input.text))
-        label = Label(text="Id: ", halign="left", valign="bottom")
+        label = Label(text="Id: ", halign="left", valign="bottom", padding_y=0, padding_x=0)
         layout.add_widget(label)
         layout.add_widget(text_input)
         layout.add_widget(btn)
         window_del.add_widget(layout)
         window_del.open()
+        btn.bind(on_press=window_del.dismiss)
 
     def start(self):
         self.read_t()
